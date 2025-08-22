@@ -92,18 +92,19 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@unique([cartId, variantId]) // Prevent duplicate variants in same cart
+
   @@map("cart_items")
 }
 
 model Promo {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  code          String    @unique // e.g., "SUMMER21"
+  code          String    @unique 
   type          PromoType
   value         Float
   usageLimit    Int?
   usageCount    Int       @default(0)
   minimumAmount Float?
-  maximumAmount Float?
+  uptoDiscount Float?
 
   status    PromoStatus @default(ACTIVE)
   validFrom DateTime
