@@ -30,7 +30,7 @@ model Product {
   images      String[] @default([])
   isFeatured  Boolean  @default(false)
 
-  category   Category  @relation(fields: [categoryId], references: [id])
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId String    @db.ObjectId
   variants   Variant[]
 
@@ -47,7 +47,7 @@ model Variant {
   stock     Int     @default(0)
   isDefault Boolean @default(false)
 
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String  @db.ObjectId
 
   CartItem CartItem[]
@@ -59,7 +59,7 @@ model Cart {
   id      String     @id @default(auto()) @map("_id") @db.ObjectId
   token   String     @unique
   items   CartItem[]
-  promo   Promo?     @relation(fields: [promoId], references: [id])
+  promo   Promo?     @relation(fields: [promoId], references: [id], onDelete: Cascade)
   promoId String?    @db.ObjectId
 
   expiresAt DateTime
@@ -78,15 +78,15 @@ model Cart {
 }
 
 model CartItem {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId
-  quantity   Int    @default(1)
-  
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int    @default(1)
+
   unitPrice  Float
   totalPrice Float
 
-  cart      Cart     @relation(fields: [cartId], references: [id])
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   cartId    String   @db.ObjectId
-  variant   Variant  @relation(fields: [variantId], references: [id])
+  variant   Variant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
   variantId String   @db.ObjectId
   addedAt   DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -122,10 +122,10 @@ model Order {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   orderNumber String @unique
 
-  cart   Cart   @relation(fields: [cartId], references: [id])
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
   cartId String @unique @db.ObjectId
 
-  promo   Promo?  @relation(fields: [promoId], references: [id])
+  promo   Promo?  @relation(fields: [promoId], references: [id], onDelete: Cascade)
   promoId String? @db.ObjectId
 
   subtotal       Float

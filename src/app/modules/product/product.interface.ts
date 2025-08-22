@@ -6,9 +6,3 @@ export interface IProductQuery {
   minPrice?: number;
   maxPrice?: number;
 }
-
-export interface MongoAggregateResponse<T = any> {
-  cursor: {
-    firstBatch: T[];
-  };
-}

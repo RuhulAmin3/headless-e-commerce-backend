@@ -1,12 +1,11 @@
 import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
-import { Product, Variant } from "@prisma/client";
+import { Prisma, Product, Variant } from "@prisma/client";
 import { IPaginationOptions } from "../../../interfaces/paginations";
 import { paginationHelper } from "../../../helpars/paginationHelper";
 import { generateSlug } from "../category/category.utils";
-import { IProductQuery, MongoAggregateResponse } from "./product.interface";
-import { ObjectId } from "mongodb";
+import { IProductQuery } from "./product.interface";
 
 // Create Product
 const createProduct = async (
@@ -60,106 +59,90 @@ const getAllProducts = async (
   paginationOptions: IPaginationOptions,
 ) => {
   const { searchTerm, isFeatured, categoryId, variant, minPrice, maxPrice } =
-    query;
+    query || {};
+
+  const andConditions: Prisma.ProductWhereInput[] = [];
 
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
 
-  const match: any = {};
-
-  // 🔎 Search
+  // 🔎 Full-text search
   if (searchTerm) {
-    match.$or = [
-      { name: { $regex: searchTerm, $options: "i" } },
-      { description: { $regex: searchTerm, $options: "i" } },
-      { slug: { $regex: searchTerm, $options: "i" } },
-    ];
-  }
-
-  // 🎯 Filters
-  if (typeof isFeatured === "boolean") {
-    match.isFeatured = isFeatured;
-  }
-
-  if (categoryId) {
-    match.categoryId = new ObjectId(categoryId);
-  }
-
-  const variantConditions: any[] = [];
-
-  if (variant) {
-    variantConditions.push({
-      "variants.name": { $regex: variant, $options: "i" },
+    andConditions.push({
+      OR: [
+        { name: { contains: searchTerm, mode: "insensitive" } },
+        { description: { contains: searchTerm, mode: "insensitive" } },
+        { slug: { contains: searchTerm, mode: "insensitive" } },
+      ],
     });
   }
 
+  //  Filter: isFeatured
+  if (typeof isFeatured === "boolean") {
+    andConditions.push({ isFeatured });
+  }
+
+  //  Filter: category
+  if (categoryId) {
+    andConditions.push({ categoryId });
+  }
+
+  // Filter: variant name
+  if (variant) {
+    andConditions.push({
+      variants: {
+        some: {
+          name: { contains: variant, mode: "insensitive" },
+        },
+      },
+    });
+  }
+
+  // Filter: price range
   if (minPrice !== undefined || maxPrice !== undefined) {
-    const priceCond: any = {};
-    if (minPrice !== undefined) priceCond.$gte = minPrice;
-    if (maxPrice !== undefined) priceCond.$lte = maxPrice;
+    const priceFilter: Prisma.VariantWhereInput = {};
 
-    variantConditions.push({ "variants.price": priceCond });
+    if (minPrice !== undefined) {
+      priceFilter.price = { gte: minPrice };
+    }
+
+    if (maxPrice !== undefined) {
+      priceFilter.price = {
+        ...(typeof priceFilter.price === "object" && priceFilter.price !== null
+          ? priceFilter.price
+          : {}),
+        lte: maxPrice,
+      };
+    }
+
+    andConditions.push({
+      variants: { some: priceFilter },
+    });
   }
 
-  if (variantConditions.length > 0) {
-    match.$and = match.$and
-      ? [...match.$and, ...variantConditions]
-      : variantConditions;
-  }
+  const whereCondition: Prisma.ProductWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
 
-  // 🛠 Aggregation pipeline
-  const pipeline: any[] = [
-    { $match: match },
-    {
-      $lookup: {
-        from: "categories",
-        localField: "categoryId",
-        foreignField: "_id",
-        as: "category",
-      },
-    },
-    { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
-    {
-      $lookup: {
-        from: "variants",
-        localField: "_id",
-        foreignField: "productId",
-        as: "variants",
-      },
-    },
-    {
-      $sort: sortBy
-        ? { [sortBy]: sortOrder?.toLowerCase() === "asc" ? 1 : -1 }
-        : { createdAt: -1 },
-    },
-    { $skip: skip },
-    { $limit: limit },
-  ];
+  // Query products
+  const products = await prisma.product.findMany({
+    where: whereCondition,
+    include: { category: true, variants: true },
+    skip,
+    take: limit,
+    orderBy: sortBy
+      ? { [sortBy]: sortOrder?.toLowerCase() === "asc" ? "asc" : "desc" }
+      : { createdAt: "desc" },
+  });
 
-  const countPipeline: any[] = [{ $match: match }, { $count: "total" }];
+  const total = await prisma.product.count({ where: whereCondition });
 
-  console.log("pipeLine", pipeline);
+  const meta = {
+    page,
+    limit,
+    total,
+  };
 
-  // Execute aggregation with explicit type
-  const productsResult = (await prisma.$runCommandRaw({
-    aggregate: "products",
-    pipeline,
-    cursor: {},
-  })) as unknown as MongoAggregateResponse;
-
-  const countResult = (await prisma.$runCommandRaw({
-    aggregate: "products",
-    pipeline: countPipeline,
-    cursor: {},
-  })) as unknown as MongoAggregateResponse<{ total: number }>;
-
-  const total = countResult?.cursor?.firstBatch?.[0]?.total ?? 0;
-
-  const meta = { page, limit, total };
-
-  console.log("pipeLine", pipeline);
-
-  return { data: productsResult.cursor.firstBatch[0] ?? [], meta };
+  return { data: products, meta };
 };
 
 // Get Product by ID

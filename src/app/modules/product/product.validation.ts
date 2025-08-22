@@ -16,14 +16,15 @@ export const createProductSchema = z.object({
   variants: z.array(createVariantSchema),
 });
 
-export const updateProductSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  images: z.array(z.string()).optional(),
-  isFeatured: z.boolean().optional(),
-  categoryId: z.string().optional(),
-  variants: z.array(createVariantSchema).optional(),
-});
+export const updateProductSchema = z
+  .object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    images: z.array(z.string()).optional(),
+    isFeatured: z.boolean().optional(),
+    categoryId: z.string().optional(),
+  })
+  .strict();
 
 export const productValidation = {
   createProductSchema,

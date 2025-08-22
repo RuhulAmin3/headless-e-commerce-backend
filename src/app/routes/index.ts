@@ -9,6 +9,8 @@ import { productRoutes } from "../modules/product/product.routes";
 
 import { seedRoutes } from "../modules/seed/seed.routes";
 
+import { variantRoutes } from "../modules/variant/variant.routes";
+
 const moduleRoutes = [
   {
     path: "/file",
@@ -25,6 +27,10 @@ const moduleRoutes = [
   {
     path: "/seed",
     route: seedRoutes,
+  },
+  {
+    path: "/variants",
+    route: variantRoutes,
   },
 ];
 
