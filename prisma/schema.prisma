@@ -8,12 +8,13 @@ datasource db {
 }
 
 model Category {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  name        String    @unique
-  products    Product[]
-  slug        String    @unique
-  images      String[]  @default([])
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  slug        String   @unique
+  images      String[] @default([])
   description String?
+
+  products Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -22,19 +23,16 @@ model Category {
 }
 
 model Product {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  slug String @unique
-
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String   @unique
   description String?
+  images      String[] @default([])
+  isFeatured  Boolean  @default(false)
 
   category   Category  @relation(fields: [categoryId], references: [id])
   categoryId String    @db.ObjectId
   variants   Variant[]
-
-  images String[] @default([])
-
-  isFeatured Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -44,16 +42,15 @@ model Product {
 
 model Variant {
   id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id])
-  productId String  @db.ObjectId
   name      String
   price     Float
   stock     Int     @default(0)
   isDefault Boolean @default(false)
 
-  CartItem CartItem[]
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @db.ObjectId
 
-  OrderItem OrderItem[]
+  CartItem CartItem[]
 
   @@map("variants")
 }
@@ -65,28 +62,32 @@ model Cart {
   promo   Promo?     @relation(fields: [promoId], references: [id])
   promoId String?    @db.ObjectId
 
-  expiresAt DateTime // Auto-expire carts after X days
+  expiresAt DateTime
 
   subtotal       Float @default(0)
   discountAmount Float @default(0)
   total          Float @default(0)
 
+  order Order?
+
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
 
   @@map("carts")
 }
 
 model CartItem {
-  id         String  @id @default(auto()) @map("_id") @db.ObjectId
-  cart       Cart    @relation(fields: [cartId], references: [id])
-  cartId     String  @db.ObjectId
-  variant    Variant @relation(fields: [variantId], references: [id])
-  variantId  String  @db.ObjectId
-  quantity   Int     @default(1)
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity   Int    @default(1)
+  
   unitPrice  Float
   totalPrice Float
 
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  cartId    String   @db.ObjectId
+  variant   Variant  @relation(fields: [variantId], references: [id])
+  variantId String   @db.ObjectId
   addedAt   DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -95,75 +96,46 @@ model CartItem {
 }
 
 model Promo {
-  id    String    @id @default(auto()) @map("_id") @db.ObjectId
-  code  String    @unique // e.g., "SUMMER21"
-  type  PromoType
-  value Float
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  code          String    @unique // e.g., "SUMMER21"
+  type          PromoType
+  value         Float
+  usageLimit    Int?
+  usageCount    Int       @default(0)
+  minimumAmount Float?
+  maximumAmount Float?
 
-  usageLimit Int? // Total usage limit
-  usageCount Int  @default(0)
-
-  minimumAmount Float? // Minimum order amount to apply promo
-  maximumAmount Float? // Maximum discount amount
-
-  status PromoStatus @default(ACTIVE) // active, inactive, expired
-
+  status    PromoStatus @default(ACTIVE)
   validFrom DateTime
   validTo   DateTime
 
-  Cart Cart[]
-
+  Cart  Cart[]
   Order Order[]
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   @@map("promos")
 }
 
 model Order {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
   orderNumber String @unique
 
-  items   OrderItem[]
-  promo   Promo?      @relation(fields: [promoId], references: [id])
-  promoId String?     @db.ObjectId
+  cart   Cart   @relation(fields: [cartId], references: [id])
+  cartId String @unique @db.ObjectId
+
+  promo   Promo?  @relation(fields: [promoId], references: [id])
+  promoId String? @db.ObjectId
 
   subtotal       Float
   discountAmount Float @default(0)
-
-  total Float
+  total          Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("orders")
-}
-
-model OrderItem {
-  
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  order Order @relation(fields: [orderId], references: [id])
-
-  orderId String @db.ObjectId
-
-  variant Variant @relation(fields: [variantId], references: [id])
-
-  variantId String @db.ObjectId
-
-  quantity Int
-
-  unitPrice Float // Price at time of order
-
-  totalPrice Float
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("order_items")
 }
 
 enum PromoType {

@@ -1,32 +1,37 @@
 import express from "express";
-import { fileUploader } from "../../../helpars/fileUploader";
-import validateRequest from "../../middlewares/validateRequest";
 import { imageController } from "./image.controller";
 import { imageValidation } from "./image.validation";
+import { fileUploader } from "../../../helpars/fileUploader";
+import validateRequest from "../../middlewares/validateRequest";
 
 const router = express.Router();
 
-// Create image route (POST)
+// Upload single image
 router.post(
   "/",
   fileUploader.upload.single("file"),
-  imageController.createImage
+  imageController.createImage,
 );
 
-// Create image route (POST)
+// Upload multiple images
 router.post(
   "/multiple",
-  fileUploader.upload.array("files"),
-  imageController.createMultipleImage
+  fileUploader.upload.array("files", 10), // Max 10 files
+  imageController.createImages,
 );
 
-// Delete image by ID route (DELETE)
-router.delete("/delete", imageController.deleteImage);
-
+// Delete single image
 router.delete(
-  "/bulk",
+  "/delete",
+  validateRequest(imageValidation.deleteImageSchema),
+  imageController.deleteImage,
+);
+
+// Delete multiple images
+router.delete(
+  "/delete-multiple",
   validateRequest(imageValidation.deleteMultipleImagesSchema),
-  imageController.deleteMultipleImages
+  imageController.deleteMultipleImages,
 );
 
 export const imageRoutes = router;

@@ -61,7 +61,7 @@ export const uploadToDigitalOceanAWS = async (
     // Prepare the upload command
     const command = new PutObjectCommand({
       Bucket: `${process.env.DO_SPACE_BUCKET}`,
-      Key: `${file.originalname}`,
+      Key: `${file.originalname.split(" ").join("-")}`, // Replace spaces with hyphens
       Body: fileBody,
       ACL: "public-read",
       ContentType: file.mimetype,
@@ -71,7 +71,7 @@ export const uploadToDigitalOceanAWS = async (
     await s3Client.send(command);
 
     // Construct the direct URL to the uploaded file
-    const Location = `${process.env.DO_SPACE_ENDPOINT}/${process.env.DO_SPACE_BUCKET}/${file.originalname}`;
+    const Location = `${process.env.DO_SPACE_ENDPOINT}/${process.env.DO_SPACE_BUCKET}/${file.originalname.split(" ").join("-")}`;
 
     return { Location };
   } catch (error) {

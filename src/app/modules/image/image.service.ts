@@ -1,31 +1,38 @@
 // Image.service: Module file for the Image.service functionality.
 import httpStatus from "http-status";
-import ApiError from "../../../errors/ApiErrors";
 
 import { Request } from "express";
-
-import { uploadFile } from "../../../helpars/uploadFile";
+import ApiError from "../../../errors/ApiErrors";
 import {
   deleteFromDigitalOceanAWS,
   deleteMultipleFromDigitalOceanAWS,
+  uploadToDigitalOceanAWS,
 } from "../../../helpars/uploadToDigitalOceanAWS";
 
-//create image
-const createImage = async (req: Request) => {
+//upload image
+const uploadImage = async (req: Request) => {
   if (!req.file) {
     throw new ApiError(httpStatus.BAD_REQUEST, "No image provided");
   }
 
   const file = req.file;
 
-  const imageUrl = (await uploadFile(file!, "file")).Location;
+  const imageUrl = (await uploadToDigitalOceanAWS(file)).Location;
 
-  return { imageUrl };
+  if (!imageUrl) {
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "Failed to upload image",
+    );
+  }
+
+  return { url: imageUrl };
 };
 
 // Service for creating images//multiple images creation
-const createImages = async (req: Request) => {
-  const files = req.files as any[];
+const uploadMultipleImage = async (req: Request) => {
+  const files = req.files as Express.Multer.File[];
+
   if (!files || files.length === 0) {
     throw new ApiError(httpStatus.BAD_REQUEST, "No images provided");
   }
@@ -33,12 +40,12 @@ const createImages = async (req: Request) => {
   const imageUrls = [];
 
   for (const file of files) {
-    const url = (await uploadFile(file, "files")).Location;
+    const url = (await uploadToDigitalOceanAWS(file)).Location;
 
     imageUrls.push(url);
   }
 
-  return { imageUrls };
+  return { url: imageUrls };
 };
 
 //delete single image
@@ -64,9 +71,9 @@ const deleteMultipleImages = async (urls: string[]) => {
   return result;
 };
 
-export const imageServices = {
-  createImage,
-  createImages,
+export const imageService = {
+  uploadImage,
+  uploadMultipleImage,
   deleteImage,
   deleteMultipleImages,
 };

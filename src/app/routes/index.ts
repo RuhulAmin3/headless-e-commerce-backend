@@ -3,10 +3,16 @@ import { imageRoutes } from "../modules/image/image.routes";
 
 const router = express.Router();
 
+import { categoryRoutes } from "../modules/category/category.routes";
+
 const moduleRoutes = [
   {
     path: "/file",
     route: imageRoutes,
+  },
+  {
+    path: "/categories",
+    route: categoryRoutes,
   },
 ];
 
