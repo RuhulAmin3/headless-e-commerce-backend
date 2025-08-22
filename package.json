@@ -12,7 +12,7 @@
     "generate": "ts-node src/generate-module.ts",
     "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "test \"$CI\" != \"true\" && test \"$NODE_ENV\" != \"production\" && husky install || echo \"Skipping husky in CI/production\""
+    "prepare": "husky"
   },
   "lint-staged": {
     "src/**/*.ts": [
