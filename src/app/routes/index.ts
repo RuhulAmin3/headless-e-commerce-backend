@@ -5,6 +5,10 @@ const router = express.Router();
 
 import { categoryRoutes } from "../modules/category/category.routes";
 
+import { productRoutes } from "../modules/product/product.routes";
+
+import { seedRoutes } from "../modules/seed/seed.routes";
+
 const moduleRoutes = [
   {
     path: "/file",
@@ -13,6 +17,14 @@ const moduleRoutes = [
   {
     path: "/categories",
     route: categoryRoutes,
+  },
+  {
+    path: "/products",
+    route: productRoutes,
+  },
+  {
+    path: "/seed",
+    route: seedRoutes,
   },
 ];
 
