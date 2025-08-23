@@ -13,6 +13,8 @@ import { variantRoutes } from "../modules/variant/variant.routes";
 
 import { promoRoutes } from "../modules/promo/promo.routes";
 
+import { cartRoutes } from "../modules/cart/cart.routes";
+
 const moduleRoutes = [
   {
     path: "/file",
@@ -37,6 +39,10 @@ const moduleRoutes = [
   {
     path: "/promos",
     route: promoRoutes,
+  },
+  {
+    path: "/cart",
+    route: cartRoutes,
   },
 ];
 
