@@ -1,3 +1,6 @@
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.config";
+
 import rTracer from "cls-rtracer";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -50,7 +53,12 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-// Router setup
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, { explorer: true }),
+);
+
 app.use("/api/v1", router);
 
 // Error handling middleware
