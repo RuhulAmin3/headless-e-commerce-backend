@@ -15,7 +15,11 @@ import { stream } from "./shared/logger";
 const app: Application = express();
 
 const corsOptions = {
-  origin: ["http://localhost:4000", "http://localhost:4001"],
+  origin: [
+    "http://localhost:4000",
+    "http://localhost:4001",
+    "https://headless-e-commerce-backend.onrender.com/",
+  ],
 
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
   allowedHeaders: [

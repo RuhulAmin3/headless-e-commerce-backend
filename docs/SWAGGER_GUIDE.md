@@ -16,7 +16,7 @@ This project uses **Swagger UI** with **OpenAPI 3.0** to provide comprehensive A
 ### Production
 
 - Update the server URL in `src/config/swagger.config.ts` to match your production domain
-- Access via `https://your-domain.com/api-docs`
+- Access via `https://headless-e-commerce-backend.onrender.com/api-docs/`
 
 ## Project Structure
 

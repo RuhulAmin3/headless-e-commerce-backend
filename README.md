@@ -31,17 +31,23 @@ npm run postinstall
 npm run dev
 ```
 
-### 🌐 Access Points
+### 🌐 Access Points Locally
 
 - **API Base URL**: http://localhost:3000/api/v1
 - **Interactive API Documentation**: http://localhost:3000/api-docs
 - **Health Check**: http://localhost:3000
 
+### 🌐 Access Points Deployed
+
+- **API Base URL**: https://headless-e-commerce-backend.onrender.com/api/v1
+- **Interactive API Documentation**: https://headless-e-commerce-backend.onrender.com/api-docs
+- **Health Check**: https://headless-e-commerce-backend.onrender.com
+
 ## 📚 API Documentation
 
 ### Interactive Swagger UI
 
-Access the complete API documentation at **http://localhost:3000/api-docs**
+Access the complete API documentation at **https://headless-e-commerce-backend.onrender.com/api-docs/**
 
 **Features:**
 
@@ -112,8 +118,8 @@ Access the complete API documentation at **http://localhost:3000/api-docs**
 
 - `GET /cart` - Get current cart
 - `POST /cart` - Add item to cart
-- `PATCH /cart/update-quantity/{variantId}` - Update item quantity
-- `DELETE /cart/remove/{variantId}` - Remove item from cart
+- `PATCH /cart/update-quantity/{cartItemId}` - Update item quantity
+- `DELETE /cart/remove/{cartItemId}` - Remove item from cart
 - `POST /cart/apply-promo` - Apply promo code
 - `DELETE /cart/remove-promo` - Remove promo code
 - `POST /cart/checkout` - Checkout and create order
@@ -224,19 +230,12 @@ DATABASE_URL="mongodb://localhost:27017/headless-ecommerce"
 PORT=3000
 NODE_ENV=development
 
-# File Upload (Configure one)
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-
 # AWS S3 (Alternative)
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_S3_BUCKET_NAME=your_bucket_name
 AWS_S3_REGION=your_region
 
-# Payment (Optional)
-STRIPE_SECRET_KEY=your_stripe_secret_key
 ```
 
 ## 📖 API Usage Examples
@@ -299,6 +298,4 @@ const response = await fetch(
 
 ## 🔗 Quick Links
 
-- [📖 API Documentation](http://localhost:3000/api-docs) - Interactive Swagger UI
-- [📁 Project Structure](./docs/SWAGGER_GUIDE.md) - Detailed documentation guide
-- [🛠️ Development Guide](./docs/swagger-patterns.md) - Common patterns reference
+- [📖 API Documentation](https://headless-e-commerce-backend.onrender.com/api-docs/) - Interactive Swagger UI
