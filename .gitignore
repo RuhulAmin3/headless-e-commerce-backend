@@ -3,7 +3,6 @@ node_modules
 dist
 .vercel
 .env
-/logs
-.husky/
-.github/
 /docs
+/logs
+.github/

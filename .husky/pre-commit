@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+# skip hook in CI or production
+if [ "$CI" = "true" ] || [ "$NODE_ENV" = "production" ]; then
+  echo "Skipping pre-commit hook in CI/production"
+  exit 0
+fi
+
+# run lint-staged or your lint command
+npx lint-staged

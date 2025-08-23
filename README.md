@@ -14,7 +14,7 @@
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/RuhulAmin3/headless-e-commerce-backend
 cd headless-e-commerce-backend
 
 # Install dependencies
