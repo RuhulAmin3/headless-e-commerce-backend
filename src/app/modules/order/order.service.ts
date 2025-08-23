@@ -166,10 +166,39 @@ const deleteOrder = async (id: string) => {
   return deletedOrder;
 };
 
+const getOrderAnalytics = async () => {
+  const analytics = await prisma.order.aggregate({
+    _count: {
+      _all: true,
+    },
+    _sum: {
+      total: true,
+    },
+    _avg: {
+      total: true,
+    },
+  });
+
+  const statusCounts = await prisma.order.groupBy({
+    by: ["status"],
+    _count: {
+      status: true,
+    },
+  });
+
+  return {
+    totalOrders: analytics._count._all,
+    totalRevenue: analytics._sum.total,
+    averageOrderValue: analytics._avg.total,
+    statusCounts,
+  };
+};
+
 export const orderServices = {
   getAllOrders,
   getOrderById,
   updateOrderStatus,
   cancelOrder,
   deleteOrder,
+  getOrderAnalytics,
 };
