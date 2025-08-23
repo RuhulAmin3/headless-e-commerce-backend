@@ -16,7 +16,7 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Category'
+ *             $ref: '#/components/schemas/CreateCategoryRequest'
  *     responses:
  *       201:
  *         description: The created category
@@ -90,7 +90,7 @@ router.get("/:id", categoryController.getCategoryById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Category'
+ *             $ref: '#/components/schemas/UpdateCategoryRequest'
  *     responses:
  *       200:
  *         description: The updated category

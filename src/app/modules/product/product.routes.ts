@@ -16,7 +16,7 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             $ref: '#/components/schemas/CreateProductRequest'
  *     responses:
  *       201:
  *         description: The created product
@@ -90,7 +90,7 @@ router.get("/:id", productController.getProductById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             $ref: '#/components/schemas/UpdateProductRequest'
  *     responses:
  *       200:
  *         description: The updated product

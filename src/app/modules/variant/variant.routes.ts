@@ -16,7 +16,7 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Variant'
+ *             $ref: '#/components/schemas/CreateVariantRequest'
  *     responses:
  *       201:
  *         description: The created variant
@@ -90,7 +90,7 @@ router.get("/:id", variantController.getVariantById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Variant'
+ *             $ref: '#/components/schemas/UpdateVariantRequest'
  *     responses:
  *       200:
  *         description: The updated variant

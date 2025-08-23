@@ -16,7 +16,7 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Promo'
+ *             $ref: '#/components/schemas/CreatePromoRequest'
  *     responses:
  *       201:
  *         description: The created promo
@@ -90,7 +90,7 @@ router.get("/:id", promoController.getPromoById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Promo'
+ *             $ref: '#/components/schemas/UpdatePromoRequest'
  *     responses:
  *       200:
  *         description: The updated promo

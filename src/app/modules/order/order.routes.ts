@@ -74,10 +74,7 @@ router.get("/:id", orderController.getOrderById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               newStatus:
- *                 type: string
+ *             $ref: '#/components/schemas/UpdateOrderStatusRequest'
  *     responses:
  *       200:
  *         description: The updated order

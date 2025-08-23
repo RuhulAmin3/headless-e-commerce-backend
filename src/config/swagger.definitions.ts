@@ -136,4 +136,131 @@
  *           type: number
  *         price:
  *           type: number
+ *     CreateCategoryRequest:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *     UpdateCategoryRequest:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *     CreateProductRequest:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *         isFeatured:
+ *           type: boolean
+ *         categoryId:
+ *           type: string
+ *         variants:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/CreateVariantRequest'
+ *     UpdateProductRequest:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *         isFeatured:
+ *           type: boolean
+ *         categoryId:
+ *           type: string
+ *     CreateVariantRequest:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         price:
+ *           type: number
+ *         stock:
+ *           type: number
+ *         isDefault:
+ *           type: boolean
+ *     UpdateVariantRequest:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         price:
+ *           type: number
+ *         stock:
+ *           type: number
+ *         isDefault:
+ *           type: boolean
+ *     CreatePromoRequest:
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: string
+ *         type:
+ *           type: string
+ *         value:
+ *           type: number
+ *         usageLimit:
+ *           type: number
+ *         minimumAmount:
+ *           type: number
+ *         uptoDiscount:
+ *           type: number
+ *         validFrom:
+ *           type: string
+ *           format: date-time
+ *         validTo:
+ *           type: string
+ *           format: date-time
+ *     UpdatePromoRequest:
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: string
+ *         type:
+ *           type: string
+ *         value:
+ *           type: number
+ *         usageLimit:
+ *           type: number
+ *         minimumAmount:
+ *           type: number
+ *         uptoDiscount:
+ *           type: number
+ *         status:
+ *           type: string
+ *         validFrom:
+ *           type: string
+ *           format: date-time
+ *         validTo:
+ *           type: string
+ *           format: date-time
+ *     UpdateOrderStatusRequest:
+ *       type: object
+ *       properties:
+ *         newStatus:
+ *           type: string
  */
