@@ -1,4 +1,26 @@
-# API Documentation
+# Headless E-commerce Backend API Documentation
+
+## Interactive API Documentation (Swagger)
+
+This project provides comprehensive API documentation using Swagger UI with OpenAPI 3.0.
+
+### Access Documentation
+
+- **Local Development**: http://localhost:3000/api-docs
+- **Production**: Update server URL in `src/config/swagger.config.ts`
+
+### Features
+
+- Interactive API testing directly in browser
+- Complete request/response schemas
+- Authentication examples with `x-cart-token` header
+- Organized by modules: Image, Category, Product, Variant, Promo, Cart, Order, Seed
+
+### Getting Started
+
+1. Install dependencies: `npm install`
+2. Start development server: `npm run dev`
+3. Open http://localhost:3000/api-docs
 
 ## Table of Contents
 

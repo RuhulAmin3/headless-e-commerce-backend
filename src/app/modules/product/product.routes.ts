@@ -9,21 +9,75 @@ const router = express.Router();
  * @swagger
  * /products:
  *   post:
- *     summary: Create a new product
+ *     summary: Create a new product with variants
  *     tags: [Product]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateProductRequest'
+ *             type: object
+ *             required:
+ *               - name
+ *               - categoryId
+ *               - variants
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Product name
+ *                 example: "iPhone 15 Pro"
+ *               description:
+ *                 type: string
+ *                 description: Product description (optional)
+ *                 example: "Latest iPhone with advanced features"
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of image URLs (optional)
+ *                 example: ["https://example.com/iphone.jpg"]
+ *               isFeatured:
+ *                 type: boolean
+ *                 description: Whether product is featured (optional)
+ *                 example: true
+ *               categoryId:
+ *                 type: string
+ *                 description: Category ID
+ *                 example: "64f1b2b3b3b3b3b3b3b3b3b3"
+ *               variants:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - name
+ *                     - price
+ *                     - stock
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: "128GB - Silver"
+ *                     price:
+ *                       type: number
+ *                       example: 999.99
+ *                     stock:
+ *                       type: number
+ *                       example: 50
+ *                     isDefault:
+ *                       type: boolean
+ *                       example: true
  *     responses:
  *       201:
- *         description: The created product
+ *         description: Product created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Product'
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post(
   "/",
@@ -35,17 +89,109 @@ router.post(
  * @swagger
  * /products:
  *   get:
- *     summary: Get all products
+ *     summary: Get all products with advanced filtering and pagination
  *     tags: [Product]
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 10
+ *         description: Number of items per page
+ *       - name: sortBy
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *           default: "createdAt"
+ *         description: Field to sort by
+ *       - name: sortOrder
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: "desc"
+ *         description: Sort order
+ *       - name: searchTerm
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Search term for product name or description
+ *         example: "iphone"
+ *       - name: isFeatured
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: ["true", "false"]
+ *         description: Filter by featured products
+ *       - name: categoryId
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter by category ID
+ *         example: "64f1b2b3b3b3b3b3b3b3b3b3"
+ *       - name: variant
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter by variant name
+ *         example: "128GB"
+ *       - name: minPrice
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: number
+ *         description: Minimum price filter
+ *         example: 100
+ *       - name: maxPrice
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: number
+ *         description: Maximum price filter
+ *         example: 1000
  *     responses:
  *       200:
- *         description: A list of products
+ *         description: Products retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Products retrieved successfully!"
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
  */
 router.get("/", productController.getAllProducts);
 
@@ -76,7 +222,7 @@ router.get("/:id", productController.getProductById);
  * @swagger
  * /products/{id}:
  *   patch:
- *     summary: Update a product
+ *     summary: Update a product (variants updated separately)
  *     tags: [Product]
  *     parameters:
  *       - in: path
@@ -90,14 +236,49 @@ router.get("/:id", productController.getProductById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateProductRequest'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Product name (optional)
+ *                 example: "iPhone 15 Pro Max"
+ *               description:
+ *                 type: string
+ *                 description: Product description (optional)
+ *                 example: "Updated product description"
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of image URLs (optional)
+ *                 example: ["https://example.com/new-image.jpg"]
+ *               isFeatured:
+ *                 type: boolean
+ *                 description: Whether product is featured (optional)
+ *                 example: false
+ *               categoryId:
+ *                 type: string
+ *                 description: Category ID (optional)
+ *                 example: "64f1b2b3b3b3b3b3b3b3b3b3"
  *     responses:
  *       200:
- *         description: The updated product
+ *         description: Product updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Product'
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.patch(
   "/:id",

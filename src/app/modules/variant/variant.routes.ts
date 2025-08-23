@@ -9,21 +9,53 @@ const router = express.Router();
  * @swagger
  * /variants:
  *   post:
- *     summary: Create a new variant
+ *     summary: Create a new variant for a product
  *     tags: [Variant]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateVariantRequest'
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *               - stock
+ *               - productId
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Variant name (e.g., size, color)
+ *                 example: "256GB - Space Black"
+ *               price:
+ *                 type: number
+ *                 description: Variant price
+ *                 example: 1199.99
+ *               stock:
+ *                 type: number
+ *                 description: Available stock quantity
+ *                 example: 25
+ *               isDefault:
+ *                 type: boolean
+ *                 description: Whether this is the default variant (optional)
+ *                 example: false
+ *               productId:
+ *                 type: string
+ *                 description: Product ID this variant belongs to
+ *                 example: "64f1b2b3b3b3b3b3b3b3b3b3"
  *     responses:
  *       201:
- *         description: The created variant
+ *         description: Variant created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Variant'
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post(
   "/",
@@ -35,17 +67,27 @@ router.post(
  * @swagger
  * /variants:
  *   get:
- *     summary: Get all variants
+ *     summary: Get all variants (typically filtered by productId)
  *     tags: [Variant]
+ *     description: This endpoint returns variants, usually filtered by productId in the service layer
  *     responses:
  *       200:
- *         description: A list of variants
+ *         description: Variants retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Variant'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Variants retrieved successfully!"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Variant'
  */
 router.get("/", variantController.getAllVariants);
 
@@ -90,14 +132,43 @@ router.get("/:id", variantController.getVariantById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateVariantRequest'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Variant name (optional)
+ *                 example: "512GB - Space Black"
+ *               price:
+ *                 type: number
+ *                 description: Variant price (optional)
+ *                 example: 1399.99
+ *               stock:
+ *                 type: number
+ *                 description: Available stock quantity (optional)
+ *                 example: 15
+ *               isDefault:
+ *                 type: boolean
+ *                 description: Whether this is the default variant (optional)
+ *                 example: true
  *     responses:
  *       200:
- *         description: The updated variant
+ *         description: Variant updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Variant'
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Variant not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.patch(
   "/:id",

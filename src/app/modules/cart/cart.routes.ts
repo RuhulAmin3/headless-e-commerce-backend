@@ -32,14 +32,33 @@ router.get("/", cartController.getCart);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CartItem'
+ *             type: object
+ *             required:
+ *               - variantId
+ *               - quantity
+ *             properties:
+ *               variantId:
+ *                 type: string
+ *                 description: Variant ID to add to cart
+ *                 example: "64f1b2b3b3b3b3b3b3b3b3b3"
+ *               quantity:
+ *                 type: number
+ *                 minimum: 1
+ *                 description: Quantity (must be positive integer)
+ *                 example: 2
  *     responses:
  *       200:
- *         description: The updated cart
+ *         description: Item added to cart successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Cart'
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post(
   "/",
@@ -60,22 +79,39 @@ router.post(
  *           type: string
  *         required: true
  *         description: The ID of the variant to update
+ *         example: "64f1b2b3b3b3b3b3b3b3b3b3"
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - quantity
  *             properties:
  *               quantity:
  *                 type: number
+ *                 description: New quantity for the cart item
+ *                 example: 3
  *     responses:
  *       200:
- *         description: The updated cart
+ *         description: Cart item quantity updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Cart'
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Cart item not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.patch(
   "/update-quantity/:variantId",
@@ -118,16 +154,26 @@ router.delete("/remove/:variantId", cartController.removeCartItem);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - promoCode
  *             properties:
  *               promoCode:
  *                 type: string
+ *                 description: Promo code to apply
+ *                 example: "SAVE20"
  *     responses:
  *       200:
- *         description: The updated cart
+ *         description: Promo code applied successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Cart'
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Invalid promo code or validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post(
   "/apply-promo",
