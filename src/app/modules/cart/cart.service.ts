@@ -268,6 +268,96 @@ const removePromoFromCart = async (token: string) => {
   });
 };
 
+// Checkout / Create Order
+const checkoutFromCart = async (cartToken: string) => {
+  const cart = await prisma.cart.findUnique({
+    where: { token: cartToken },
+    include: { items: { include: { variant: true } }, promo: true },
+  });
+
+  if (!cart) throw new ApiError(httpStatus.NOT_FOUND, "Cart not found");
+
+  if (cart.items.length === 0)
+    throw new ApiError(httpStatus.BAD_REQUEST, "Cart is empty");
+
+  // Recalculate totals
+  const recalc = await calculateCartTotals(cart.id);
+
+  if (recalc.total <= 0)
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Total must be greater than zero",
+    );
+
+  const order = await prisma.$transaction(async (tsx) => {
+    // Validate and decrement stock
+    for (const item of cart.items) {
+      if (item.quantity > item.variant.stock) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          `Not enough stock for variant ${item.variantId}`,
+        );
+      }
+
+      await tsx.variant.update({
+        where: { id: item.variantId },
+        data: { stock: { decrement: item.quantity } },
+      });
+    }
+
+    // Create order data
+    const orderData: any = {
+      orderNumber: `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      subtotal: recalc.subtotal,
+      discountAmount: recalc.discountAmount,
+      total: recalc.total,
+    };
+
+    if (cart.promoId) {
+      orderData.promoId = cart.promoId;
+    }
+
+    // create order with order items
+    const newOrder = await tsx.order.create({
+      data: {
+        ...orderData,
+        items: {
+          create: cart.items.map((item) => ({
+            variantId: item.variantId,
+            quantity: item.quantity,
+            price: item.unitPrice,
+          })),
+        },
+      },
+    });
+
+    // Increment promo usage if applied
+    if (cart.promoId) {
+      await tsx.promo.update({
+        where: { id: cart.promoId },
+        data: { usageCount: { increment: 1 } },
+      });
+    }
+
+    // Clear cart
+    await tsx.cartItem.deleteMany({ where: { cartId: cart.id } });
+    await tsx.cart.update({
+      where: { id: cart.id },
+      data: {
+        subtotal: 0,
+        discountAmount: 0,
+        total: 0,
+        promoId: null,
+        updatedAt: new Date(),
+      },
+    });
+
+    return newOrder;
+  });
+
+  return order;
+};
+
 export const cartServices = {
   getOrCreateCart,
   addItemToCart,
@@ -276,4 +366,5 @@ export const cartServices = {
   getCart,
   applyPromoToCart,
   removePromoFromCart,
+  checkoutFromCart,
 };

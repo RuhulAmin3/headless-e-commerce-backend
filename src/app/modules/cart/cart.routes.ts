@@ -29,4 +29,6 @@ router.post(
 
 router.delete("/remove-promo", cartController.removePromoFromCart);
 
+router.post("/checkout", cartController.checkoutFromCart);
+
 export const cartRoutes = router;

@@ -81,6 +81,17 @@ const removePromoFromCart = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const checkoutFromCart = catchAsync(async (req: Request, res: Response) => {
+  const token = getGlobalData()?.token as string;
+  const result = await cartServices.checkoutFromCart(token);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Checkout successfully!",
+    data: result,
+  });
+});
+
 export const cartController = {
   getCart,
   addItemToCart,
@@ -88,4 +99,5 @@ export const cartController = {
   removeCartItem,
   applyPromoToCart,
   removePromoFromCart,
+  checkoutFromCart,
 };
