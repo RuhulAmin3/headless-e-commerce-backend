@@ -136,12 +136,6 @@ const applyPromo = async (code: string, amount: number) => {
     discount = promo.value;
   }
 
-  // Increment usage count
-  await prisma.promo.update({
-    where: { id: promo.id },
-    data: { usageCount: { increment: 1 } },
-  });
-
   return { discount, promoId: promo.id };
 };
 

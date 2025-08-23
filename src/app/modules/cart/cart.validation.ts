@@ -10,8 +10,8 @@ export const addItemToCartSchema = z.object({
 });
 
 export const updateCartItemQuantitySchema = z.object({
-  quantity: z.number().int().positive({
-    message: "Quantity must be a positive integer",
+  quantity: z.number({
+    required_error: "quantity is required",
   }),
 });
 

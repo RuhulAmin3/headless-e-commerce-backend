@@ -30,11 +30,11 @@ const addItemToCart = catchAsync(async (req: Request, res: Response) => {
 const updateCartItemQuantity = catchAsync(
   async (req: Request, res: Response) => {
     const token = getGlobalData()?.token as string;
-    const { variantId } = req.params;
+    const { id } = req.params;
     const { quantity } = req.body;
     const result = await cartServices.updateCartItemQuantity(
       token,
-      variantId,
+      id,
       quantity,
     );
     sendResponse(res, {

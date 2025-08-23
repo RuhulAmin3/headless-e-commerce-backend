@@ -34,16 +34,18 @@ const calculateCartTotals = async (cartId: string) => {
 
   const total = subtotal - discountAmount;
 
+  const calculatedAmount = {
+    subtotal: Math.round(subtotal),
+    discountAmount: Math.round(discountAmount),
+    total: Math.round(total),
+  };
+
   await prisma.cart.update({
     where: { id: cartId },
-    data: {
-      subtotal: Math.round(subtotal),
-      discountAmount: Math.round(discountAmount),
-      total: Math.round(total),
-    },
+    data: calculatedAmount,
   });
 
-  return { subtotal, discountAmount, total };
+  return calculatedAmount;
 };
 
 const getOrCreateCart = async (token?: string) => {
@@ -138,17 +140,14 @@ const addItemToCart = async (token: string, payload: ICartItem) => {
 
 const updateCartItemQuantity = async (
   token: string,
-  variantId: string,
+  cartItemId: string,
   quantity: number,
 ) => {
   const cart = await getOrCreateCart(token);
 
   const existingCartItem = await prisma.cartItem.findUnique({
     where: {
-      cartId_variantId: {
-        cartId: cart.id,
-        variantId,
-      },
+      id: cartItemId,
     },
     include: { variant: true },
   });
@@ -157,8 +156,10 @@ const updateCartItemQuantity = async (
     throw new ApiError(httpStatus.NOT_FOUND, "Item not found in cart");
   }
 
-  if (quantity <= 0) {
-    // Remove item if quantity is 0 or less
+  const totalQuantity = quantity + existingCartItem.quantity;
+
+  if (totalQuantity <= 0) {
+    // Remove item if totalQuantity is 0 or less
     await prisma.cartItem.delete({ where: { id: existingCartItem.id } });
   } else {
     if (quantity > existingCartItem.variant.stock) {
@@ -167,8 +168,8 @@ const updateCartItemQuantity = async (
     await prisma.cartItem.update({
       where: { id: existingCartItem.id },
       data: {
-        quantity,
-        totalPrice: quantity * existingCartItem.variant.price,
+        quantity: totalQuantity,
+        totalPrice: totalQuantity * existingCartItem.variant.price,
       },
     });
   }
@@ -268,7 +269,6 @@ const removePromoFromCart = async (token: string) => {
   });
 };
 
-// Checkout / Create Order
 const checkoutFromCart = async (cartToken: string) => {
   const cart = await prisma.cart.findUnique({
     where: { token: cartToken },
@@ -276,86 +276,81 @@ const checkoutFromCart = async (cartToken: string) => {
   });
 
   if (!cart) throw new ApiError(httpStatus.NOT_FOUND, "Cart not found");
-
   if (cart.items.length === 0)
     throw new ApiError(httpStatus.BAD_REQUEST, "Cart is empty");
 
-  // Recalculate totals
   const recalc = await calculateCartTotals(cart.id);
-
   if (recalc.total <= 0)
     throw new ApiError(
       httpStatus.BAD_REQUEST,
       "Total must be greater than zero",
     );
 
-  const order = await prisma.$transaction(async (tsx) => {
-    // Validate and decrement stock
-    for (const item of cart.items) {
-      if (item.quantity > item.variant.stock) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          `Not enough stock for variant ${item.variantId}`,
-        );
+  // Transaction only for critical operations
+  const newOrder = await prisma.$transaction(
+    async (tsx) => {
+      //  Decrement stock in parallel
+      await Promise.all(
+        cart.items.map((item) => {
+          if (item.quantity > item.variant.stock) {
+            throw new ApiError(
+              httpStatus.BAD_REQUEST,
+              `Not enough stock for variant ${item.variantId}`,
+            );
+          }
+
+          return tsx.variant.update({
+            where: { id: item.variantId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }),
+      );
+
+      //  Create order + items
+      const order = await tsx.order.create({
+        data: {
+          orderNumber: `ORD-${Date.now()}`,
+          subtotal: recalc.subtotal,
+          discountAmount: recalc.discountAmount,
+          total: recalc.total,
+          promoId: cart.promoId ?? undefined,
+          items: {
+            create: cart.items.map((item) => ({
+              variantId: item.variantId,
+              quantity: item.quantity,
+              price: item.unitPrice,
+            })),
+          },
+        },
+      });
+
+      //  Update promo usage
+      if (cart.promoId) {
+        await tsx.promo.update({
+          where: { id: cart.promoId },
+          data: { usageCount: { increment: 1 } },
+        });
       }
 
-      await tsx.variant.update({
-        where: { id: item.variantId },
-        data: { stock: { decrement: item.quantity } },
-      });
-    }
+      return order;
+    },
+    { timeout: 20000 },
+  );
 
-    // Create order data
-    const orderData: any = {
-      orderNumber: `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-      subtotal: recalc.subtotal,
-      discountAmount: recalc.discountAmount,
-      total: recalc.total,
-    };
+  await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
 
-    if (cart.promoId) {
-      orderData.promoId = cart.promoId;
-    }
-
-    // create order with order items
-    const newOrder = await tsx.order.create({
-      data: {
-        ...orderData,
-        items: {
-          create: cart.items.map((item) => ({
-            variantId: item.variantId,
-            quantity: item.quantity,
-            price: item.unitPrice,
-          })),
-        },
-      },
-    });
-
-    // Increment promo usage if applied
-    if (cart.promoId) {
-      await tsx.promo.update({
-        where: { id: cart.promoId },
-        data: { usageCount: { increment: 1 } },
-      });
-    }
-
-    // Clear cart
-    await tsx.cartItem.deleteMany({ where: { cartId: cart.id } });
-    await tsx.cart.update({
-      where: { id: cart.id },
-      data: {
-        subtotal: 0,
-        discountAmount: 0,
-        total: 0,
-        promoId: null,
-        updatedAt: new Date(),
-      },
-    });
-
-    return newOrder;
+  await prisma.cart.update({
+    where: { id: cart.id },
+    data: {
+      subtotal: 0,
+      discountAmount: 0,
+      total: 0,
+      promoId: null,
+      updatedAt: new Date(),
+    },
   });
 
-  return order;
+  return newOrder;
 };
 
 export const cartServices = {

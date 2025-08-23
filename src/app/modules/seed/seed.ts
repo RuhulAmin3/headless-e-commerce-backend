@@ -122,11 +122,17 @@ export async function seedData() {
   await prisma.order.create({
     data: {
       orderNumber: `ORD-${Date.now()}`,
-      cartId: cart.id,
       promoId: percentPromo.id,
       subtotal: cart.subtotal,
       discountAmount: cart.discountAmount,
       total: cart.total,
+      items: {
+        create: cart.items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+          price: item.unitPrice,
+        })),
+      },
     },
   });
 

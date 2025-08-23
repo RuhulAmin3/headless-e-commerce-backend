@@ -14,7 +14,7 @@ router.post(
 );
 
 router.patch(
-  "/update-quantity/:variantId",
+  "/update-quantity/:id",
   validateRequest(cartValidation.updateCartItemQuantitySchema),
   cartController.updateCartItemQuantity,
 );
