@@ -18,7 +18,7 @@ const corsOptions = {
   origin: [
     "http://localhost:4000",
     "http://localhost:4001",
-    "https://headless-e-commerce-backend.onrender.com/",
+    "https://headless-e-commerce-backend.onrender.com",
   ],
 
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
@@ -27,6 +27,7 @@ const corsOptions = {
     "Authorization",
     "x-cart-token",
     "user-agent",
+    "Accept",
   ],
   credentials: true,
 };
