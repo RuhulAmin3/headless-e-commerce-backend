@@ -159,9 +159,9 @@ enum PromoStatus {
 }
 
 enum OrderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
+  PENDING      
+  PAID         
+  SHIPPED      
+  DELIVERED    
+  CANCELLED   
 }
