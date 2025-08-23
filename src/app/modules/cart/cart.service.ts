@@ -182,14 +182,11 @@ const updateCartItemQuantity = async (
   });
 };
 
-const removeCartItem = async (token: string, variantId: string) => {
+const removeCartItem = async (token: string, cartItemId: string) => {
   const cart = await getOrCreateCart(token);
   const existingCartItem = await prisma.cartItem.findUnique({
     where: {
-      cartId_variantId: {
-        cartId: cart.id,
-        variantId,
-      },
+      id: cartItemId,
     },
   });
 
@@ -270,12 +267,17 @@ const removePromoFromCart = async (token: string) => {
 };
 
 const checkoutFromCart = async (cartToken: string) => {
+  if (!cartToken) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Cart token is required");
+  }
+
   const cart = await prisma.cart.findUnique({
     where: { token: cartToken },
     include: { items: { include: { variant: true } }, promo: true },
   });
 
   if (!cart) throw new ApiError(httpStatus.NOT_FOUND, "Cart not found");
+
   if (cart.items.length === 0)
     throw new ApiError(httpStatus.BAD_REQUEST, "Cart is empty");
 

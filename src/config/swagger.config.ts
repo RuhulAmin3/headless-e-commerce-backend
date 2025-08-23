@@ -36,10 +36,11 @@ const options: swaggerJsdoc.Options = {
 
     components: {
       securitySchemes: {
-        ApiKeyAuth: {
+        CartTokenAuth: {
           type: "apiKey",
           in: "header",
           name: "x-cart-token",
+          description: "Cart session token required for cart operations",
         },
       },
       parameters: {
@@ -80,11 +81,6 @@ const options: swaggerJsdoc.Options = {
         },
       },
     },
-    security: [
-      {
-        ApiKeyAuth: [],
-      },
-    ],
   },
   apis: [
     "./src/app/modules/**/*.routes.ts",

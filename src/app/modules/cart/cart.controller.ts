@@ -30,11 +30,12 @@ const addItemToCart = catchAsync(async (req: Request, res: Response) => {
 const updateCartItemQuantity = catchAsync(
   async (req: Request, res: Response) => {
     const token = getGlobalData()?.token as string;
-    const { id } = req.params;
+
+    const { cartItemId } = req.params;
     const { quantity } = req.body;
     const result = await cartServices.updateCartItemQuantity(
       token,
-      id,
+      cartItemId,
       quantity,
     );
     sendResponse(res, {
@@ -48,8 +49,8 @@ const updateCartItemQuantity = catchAsync(
 
 const removeCartItem = catchAsync(async (req: Request, res: Response) => {
   const token = getGlobalData()?.token as string;
-  const { variantId } = req.params;
-  const result = await cartServices.removeCartItem(token, variantId);
+  const { cartItemId } = req.params;
+  const result = await cartServices.removeCartItem(token, cartItemId);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

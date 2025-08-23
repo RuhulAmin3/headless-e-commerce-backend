@@ -197,17 +197,17 @@ router.get("/", productController.getAllProducts);
 
 /**
  * @swagger
- * /products/{id}:
+ * /products/{slug}:
  *   get:
- *     summary: Get a product by ID
+ *     summary: Get a product by slug
  *     tags: [Product]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         schema:
  *           type: string
  *         required: true
- *         description: The ID of the product to retrieve
+ *         description: The slug of the product to retrieve
  *     responses:
  *       200:
  *         description: The product
@@ -216,7 +216,7 @@ router.get("/", productController.getAllProducts);
  *             schema:
  *               $ref: '#/components/schemas/Product'
  */
-router.get("/:id", productController.getProductById);
+router.get("/:slug", productController.getProductBySlug);
 
 /**
  * @swagger

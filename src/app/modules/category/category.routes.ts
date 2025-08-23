@@ -131,17 +131,17 @@ router.get("/", categoryController.getAllCategories);
 
 /**
  * @swagger
- * /categories/{id}:
+ * /categories/{slug}:
  *   get:
- *     summary: Get a category by ID
+ *     summary: Get a category by slug
  *     tags: [Category]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         schema:
  *           type: string
  *         required: true
- *         description: The ID of the category to retrieve
+ *         description: The slug of the category to retrieve
  *     responses:
  *       200:
  *         description: The category
@@ -150,7 +150,7 @@ router.get("/", categoryController.getAllCategories);
  *             schema:
  *               $ref: '#/components/schemas/Category'
  */
-router.get("/:id", categoryController.getCategoryById);
+router.get("/:slug", categoryController.getCategoryBySlug);
 
 /**
  * @swagger

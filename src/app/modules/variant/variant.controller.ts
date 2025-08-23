@@ -16,7 +16,7 @@ const createVariant = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllVariants = catchAsync(async (req: Request, res: Response) => {
-  const { productId } = pick(req.params, ["productId"]) as {
+  const { productId } = pick(req.query, ["productId"]) as {
     productId: string;
   };
 

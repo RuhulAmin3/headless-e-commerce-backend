@@ -145,8 +145,8 @@ const getAllProducts = async (
   return { data: products, meta };
 };
 
-// Get Product by ID
-const getProductById = async (slug: string) => {
+// Get Product by Slug
+const getProductBySlug = async (slug: string) => {
   const product = await prisma.product.findUnique({
     where: { slug: slug },
     include: { category: true, variants: true },
@@ -231,7 +231,7 @@ const deleteProduct = async (id: string) => {
 export const productServices = {
   createProduct,
   getAllProducts,
-  getProductById,
+  getProductBySlug,
   updateProduct,
   deleteProduct,
 };

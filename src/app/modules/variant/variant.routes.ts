@@ -69,6 +69,13 @@ router.post(
  *   get:
  *     summary: Get all variants (typically filtered by productId)
  *     tags: [Variant]
+ *     parameters:
+ *       - in: query
+ *         name: productId
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The ID of the product to filter variants by
  *     description: This endpoint returns variants, usually filtered by productId in the service layer
  *     responses:
  *       200:

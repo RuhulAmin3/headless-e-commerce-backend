@@ -11,6 +11,8 @@ const router = express.Router();
  *   get:
  *     summary: Get the cart for the current session
  *     tags: [Cart]
+ *     security:
+ *       - CartTokenAuth: []
  *     responses:
  *       200:
  *         description: The cart for the current session
@@ -18,6 +20,12 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Cart'
+ *       401:
+ *         description: Unauthorized - Missing or invalid cart token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/", cartController.getCart);
 
@@ -27,6 +35,8 @@ router.get("/", cartController.getCart);
  *   post:
  *     summary: Add an item to the cart
  *     tags: [Cart]
+ *     security:
+ *       - CartTokenAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -68,17 +78,19 @@ router.post(
 
 /**
  * @swagger
- * /cart/update-quantity/{variantId}:
+ * /cart/update-quantity/{cartItemId}:
  *   patch:
  *     summary: Update the quantity of an item in the cart
  *     tags: [Cart]
+ *     security:
+ *       - CartTokenAuth: []
  *     parameters:
  *       - in: path
- *         name: variantId
+ *         name: cartItemId
  *         schema:
  *           type: string
  *         required: true
- *         description: The ID of the variant to update
+ *         description: The ID of the cart item to update
  *         example: "64f1b2b3b3b3b3b3b3b3b3b3"
  *     requestBody:
  *       required: true
@@ -114,24 +126,26 @@ router.post(
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.patch(
-  "/update-quantity/:variantId",
+  "/update-quantity/:cartItemId",
   validateRequest(cartValidation.updateCartItemQuantitySchema),
   cartController.updateCartItemQuantity,
 );
 
 /**
  * @swagger
- * /cart/remove/{variantId}:
+ * /cart/remove/{cartItemId}:
  *   delete:
  *     summary: Remove an item from the cart
  *     tags: [Cart]
+ *     security:
+ *       - CartTokenAuth: []
  *     parameters:
  *       - in: path
- *         name: variantId
+ *         name: cartItemId
  *         schema:
  *           type: string
  *         required: true
- *         description: The ID of the variant to remove
+ *         description: The ID of the cart Item to remove
  *     responses:
  *       200:
  *         description: The updated cart
@@ -140,7 +154,7 @@ router.patch(
  *             schema:
  *               $ref: '#/components/schemas/Cart'
  */
-router.delete("/remove/:variantId", cartController.removeCartItem);
+router.delete("/remove/:cartItemId", cartController.removeCartItem);
 
 /**
  * @swagger
@@ -148,6 +162,8 @@ router.delete("/remove/:variantId", cartController.removeCartItem);
  *   post:
  *     summary: Apply a promo code to the cart
  *     tags: [Cart]
+ *     security:
+ *       - CartTokenAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -187,6 +203,8 @@ router.post(
  *   delete:
  *     summary: Remove a promo code from the cart
  *     tags: [Cart]
+ *     security:
+ *       - CartTokenAuth: []
  *     responses:
  *       200:
  *         description: The updated cart
@@ -203,6 +221,8 @@ router.delete("/remove-promo", cartController.removePromoFromCart);
  *   post:
  *     summary: Checkout the cart and create an order
  *     tags: [Cart]
+ *     security:
+ *       - CartTokenAuth: []
  *     responses:
  *       200:
  *         description: The created order

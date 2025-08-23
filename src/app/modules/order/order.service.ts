@@ -123,23 +123,26 @@ const cancelOrder = async (id: string) => {
     );
   }
 
-  const cancelledOrder = await prisma.$transaction(async (tsx) => {
-    // Restore stock
-    await Promise.all(
-      order.items.map((item) =>
-        tsx.variant.update({
-          where: { id: item.variantId },
-          data: { stock: { increment: item.quantity } },
-        }),
-      ),
-    );
+  const cancelledOrder = await prisma.$transaction(
+    async (tsx) => {
+      // Restore stock
+      await Promise.all(
+        order.items.map((item) =>
+          tsx.variant.update({
+            where: { id: item.variantId },
+            data: { stock: { increment: item.quantity } },
+          }),
+        ),
+      );
 
-    // Update status
-    return tsx.order.update({
-      where: { id },
-      data: { status: "CANCELLED", updatedAt: new Date() },
-    });
-  });
+      // Update status
+      return tsx.order.update({
+        where: { id },
+        data: { status: "CANCELLED", updatedAt: new Date() },
+      });
+    },
+    { timeout: 20000 },
+  );
 
   return cancelledOrder;
 };
@@ -166,31 +169,54 @@ const deleteOrder = async (id: string) => {
   return deletedOrder;
 };
 
-const getOrderAnalytics = async () => {
-  const analytics = await prisma.order.aggregate({
-    _count: {
-      _all: true,
+export const getOrderAnalytics = async () => {
+  // get 7 days ago
+  const fromDate = new Date();
+  fromDate.setDate(fromDate.getDate() - 7); // 7 days ago
+  fromDate.setHours(0, 0, 0, 0); // start of day
+
+  // MongoDB aggregation pipeline
+  const pipeline = [
+    {
+      $facet: {
+        // 1. Totals
+        totals: [
+          {
+            $group: {
+              _id: null,
+              totalRevenue: { $sum: "$total" },
+              totalOrders: { $sum: 1 },
+            },
+          },
+        ],
+
+        // 2. Orders by status
+        byStatus: [
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+              revenue: { $sum: "$total" },
+            },
+          },
+        ],
+      },
     },
-    _sum: {
-      total: true,
-    },
-    _avg: {
-      total: true,
-    },
+  ];
+
+  // Run aggregation using Prisma’s raw command
+  const result = await prisma.$runCommandRaw({
+    aggregate: "orders", // Mongo collection name from @@map("orders")
+    pipeline,
+    cursor: {},
   });
 
-  const statusCounts = await prisma.order.groupBy({
-    by: ["status"],
-    _count: {
-      status: true,
-    },
-  });
+  // Extract data safely
+  const firstBatch: any = (result as any)?.cursor?.firstBatch?.[0] || {};
 
   return {
-    totalOrders: analytics._count._all,
-    totalRevenue: analytics._sum.total,
-    averageOrderValue: analytics._avg.total,
-    statusCounts,
+    totals: firstBatch.totals?.[0] || { totalRevenue: 0, totalOrders: 0 },
+    byStatus: firstBatch.byStatus || [],
   };
 };
 
