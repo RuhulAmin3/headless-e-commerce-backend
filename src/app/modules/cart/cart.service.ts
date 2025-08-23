@@ -37,9 +37,9 @@ const calculateCartTotals = async (cartId: string) => {
   await prisma.cart.update({
     where: { id: cartId },
     data: {
-      subtotal,
-      discountAmount,
-      total,
+      subtotal: Math.round(subtotal),
+      discountAmount: Math.round(discountAmount),
+      total: Math.round(total),
     },
   });
 
@@ -111,8 +111,9 @@ const addItemToCart = async (token: string, payload: ICartItem) => {
       where: { id: existingCartItem.id },
       data: {
         quantity: existingCartItem.quantity + payload.quantity,
-        totalPrice:
+        totalPrice: Math.round(
           (existingCartItem.quantity + payload.quantity) * variant.price,
+        ),
       },
     });
   } else {
@@ -215,13 +216,16 @@ const getCart = async (token: string) => {
 
 const applyPromoToCart = async (token: string, promoCode: string) => {
   const cart = await getOrCreateCart(token);
-
   const promo = await prisma.promo.findUnique({
     where: { code: promoCode },
   });
 
   if (!promo) {
     throw new ApiError(httpStatus.NOT_FOUND, "Promo not found");
+  }
+
+  if (cart.promoId) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Promo already applied to cart");
   }
 
   // Check promo validity using promoService's applyPromo logic (without incrementing usageCount yet)

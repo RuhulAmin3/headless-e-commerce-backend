@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/", cartController.getCart);
 
 router.post(
-  "/add",
+  "/",
   validateRequest(cartValidation.addItemToCartSchema),
   cartController.addItemToCart,
 );
