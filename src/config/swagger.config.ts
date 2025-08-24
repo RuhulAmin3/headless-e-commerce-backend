@@ -19,7 +19,11 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api/v1",
+        url: "https://headless-e-commerce-backend.onrender.com/api/v1", // deployed server
+        description: "Production server",
+      },
+      {
+        url: "http://localhost:3000/api/v1", // local dev
         description: "Development server",
       },
     ],
