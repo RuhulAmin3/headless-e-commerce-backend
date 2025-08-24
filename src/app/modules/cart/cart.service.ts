@@ -313,6 +313,7 @@ const checkoutFromCart = async (cartToken: string) => {
         data: {
           orderNumber: `ORD-${Date.now()}`,
           subtotal: recalc.subtotal,
+          token: cart.token,
           discountAmount: recalc.discountAmount,
           total: recalc.total,
           promoId: cart.promoId ?? undefined,

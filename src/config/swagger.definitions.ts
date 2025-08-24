@@ -139,6 +139,8 @@
  *           type: string
  *         orderNumber:
  *           type: string
+ *         token:
+ *           type: string
  *         items:
  *           type: array
  *           items:

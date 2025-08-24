@@ -4,9 +4,15 @@ import { orderServices } from "./order.service";
 import sendResponse from "../../../shared/sendResponse";
 import httpStatus from "http-status";
 import pick from "../../../shared/pick";
+import { getGlobalData } from "../../../utils/asyncLocalStorage";
 
 const getAllOrders = catchAsync(async (req: Request, res: Response) => {
   const query = pick(req.query, ["status", "searchTerm"]);
+
+  const token = getGlobalData()?.token as string;
+
+  query.token = token;
+
   const paginationOptions = pick(req.query, [
     "page",
     "limit",

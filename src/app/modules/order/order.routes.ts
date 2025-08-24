@@ -9,6 +9,8 @@ const router = express.Router();
  *   get:
  *     summary: Get all orders with filtering and pagination
  *     tags: [Order]
+ *     security:
+ *       - CartTokenAuth: []
  *     parameters:
  *       - name: page
  *         in: query

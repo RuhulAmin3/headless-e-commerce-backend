@@ -21,7 +21,6 @@ const createVariant = async (payload: Variant) => {
 };
 
 const getAllVariants = async (productId?: string) => {
-  console.log("productId", productId);
   const variants = await prisma.variant.findMany({ where: { productId } });
   return variants;
 };

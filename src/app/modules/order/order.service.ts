@@ -6,15 +6,18 @@ import { IPaginationOptions } from "../../../interfaces/paginations";
 import { paginationHelper } from "../../../helpars/paginationHelper";
 
 const getAllOrders = async (
-  query: { status?: OrderStatus; searchTerm?: string },
+  query: { status?: OrderStatus; searchTerm?: string; token?: string },
   paginationOptions: IPaginationOptions,
 ) => {
-  const { status, searchTerm } = query;
-
+  const { status, searchTerm, token } = query || {};
   const andConditions: Prisma.OrderWhereInput[] = [];
 
   if (status) {
     andConditions.push({ status });
+  }
+
+  if (token) {
+    andConditions.push({ token });
   }
 
   if (searchTerm) {

@@ -124,6 +124,7 @@ export async function seedData() {
       orderNumber: `ORD-${Date.now()}`,
       promoId: percentPromo.id,
       subtotal: cart.subtotal,
+      token: cart.token,
       discountAmount: cart.discountAmount,
       total: cart.total,
       items: {

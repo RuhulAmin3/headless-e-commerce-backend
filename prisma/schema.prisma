@@ -122,6 +122,7 @@ model Promo {
 model Order {
   id             String      @id @default(auto()) @map("_id") @db.ObjectId
   orderNumber    String      @unique
+  token          String      
   items          OrderItem[]
   total          Float
   status         OrderStatus @default(PENDING)
