@@ -16,8 +16,8 @@ const app: Application = express();
 
 const corsOptions = {
   origin: [
-    "http://localhost:4000",
-    "http://localhost:4001",
+    "http://localhost:3000",
+    "http://localhost:3001",
     "https://headless-e-commerce-backend.onrender.com",
   ],
 
